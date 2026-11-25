@@ -51,9 +51,12 @@ jobs:
 
       - name: Convert
         run: cargo run --manifest-path converter/Cargo.toml --release
-
+      
+      - name: Create TXT copy
+        run: cp output.rbxlx output.txt
+      
       - uses: actions/upload-artifact@v4
         with:
           name: converted-place
-          path: output.rbxlx
+          path: output.txt
           
