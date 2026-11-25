@@ -1,4 +1,3 @@
-
 name: Convert RBXL to RBXLX
 
 on:
@@ -40,7 +39,6 @@ jobs:
           fn main() -> Result<(), Box<dyn std::error::Error>> {
               let input = BufReader::new(File::open("input.rbxl")?);
               let dom = rbx_binary::from_reader(input)?;
-
               let refs = dom.root().children().to_vec();
 
               let output = BufWriter::new(File::create("output.rbxlx")?);
