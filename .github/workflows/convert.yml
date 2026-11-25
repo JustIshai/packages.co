@@ -1,0 +1,61 @@
+
+name: Convert RBXL to RBXLX
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Create converter
+        run: |
+          mkdir converter
+
+          cat > converter/Cargo.toml <<'EOF'
+          [package]
+          name = "rbxl-converter"
+          version = "0.1.0"
+          edition = "2021"
+
+          [dependencies]
+          rbx_binary = "3.0.1"
+          rbx_xml = "3.0.1"
+          EOF
+
+          mkdir converter/src
+
+          cat > converter/src/main.rs <<'EOF'
+          use std::fs::File;
+          use std::io::{BufReader, BufWriter};
+
+          fn main() -> Result<(), Box<dyn std::error::Error>> {
+              let input = BufReader::new(File::open("input.rbxl")?);
+              let dom = rbx_binary::from_reader(input)?;
+
+              let refs = dom.root().children().to_vec();
+
+              let output = BufWriter::new(File::create("output.rbxlx")?);
+              rbx_xml::to_writer_default(output, &dom, &refs)?;
+
+              println!("Conversion complete!");
+              Ok(())
+          }
+          EOF
+
+      - name: Convert
+        run: cargo run --manifest-path converter/Cargo.toml --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: converted-place
+          path: output.rbxlx
+          
